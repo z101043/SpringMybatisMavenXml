@@ -7,6 +7,31 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+	<context:property-placeholder location="classpath:configuration/db/file.properties"/>
+
+	<beans:bean id="messageSource"
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <beans:property name="basename" value="classpath:messages/message" />
+        <beans:property name="defaultEncoding" value="UTF-8" />
+    </beans:bean>
+    
+    <beans:bean id="localeResolver"
+        class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <beans:property name="defaultLocale" value="ko" />
+    </beans:bean>
+
+    <beans:bean id="localeChangeInterceptor"
+        class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+        <beans:property name="paramName" value="lang" />
+    </beans:bean>
+
+    <beans:bean id="handlerMapping"
+        class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+        <beans:property name="interceptors">
+            <beans:ref bean="localeChangeInterceptor" />
+        </beans:property>
+    </beans:bean>
+
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
 	<!-- Enables the Spring MVC @Controller programming model -->
@@ -25,11 +50,14 @@
 		<beans:property name="order" value="0"/>
 	</beans:bean>
 	
-	<context:component-scan base-package="org.ranestar.test" />
+	<context:component-scan base-package="org.ranestar.test" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
 	
 	<mvc:interceptors> 
   		<mvc:interceptor>
-  			<!-- <mvc:mapping path="/**" />-->
+  			<!-- <mvc:mapping path="/**" /> -->
   			<mvc:mapping path="/check" />
 
     		<beans:bean class="org.ranestar.test.util.CommonSession" />
